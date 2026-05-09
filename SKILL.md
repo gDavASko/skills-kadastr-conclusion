@@ -93,6 +93,8 @@ For land parcel уточнение:
 - Ask how the existence of boundaries for 15 or more years is confirmed when уточнение or correction relies on long-standing actual boundaries.
 - Give measured area.
 - Discuss boundary markers and actual boundary features.
+- If survey equipment is mentioned, use the full instrument data from XML/user materials: instrument name, serial/factory number, verification certificate details, and verification validity period when available. Do not shorten it to a generic phrase like "геодезическая спутниковая аппаратура".
+- Write the coordinate system fully with the MCK zone. If XML has `EntitySpatial/@Name` and `CsCode`, convert the code into wording such as `МСК-16, зона 1 (код 16.1)` or `МСК-16, зона 2 (код 16.2)`. If the zone is missing or ambiguous, ask before creating the final TXT.
 - Analyze EGRN and neighboring parcels if there are discrepancies.
 - Explain agreement of boundaries or why it is not required.
 - Describe access.
@@ -126,7 +128,8 @@ For technical plans:
 - Describe contours: number and type (ground, above-ground, underground).
 - Include area, wall material, floor count, foundation, purpose, or length as relevant.
 - Cite declaration, technical passport, project documentation, or user-provided basis.
-- Include area-calculation and SKP wording when provided.
+- Always include the SKP phrase: `СКП вычисляется по формуле Mp = Ms*√(a²+b²) и составила ХХ на площадь объекта ННН кв.м.` Ask the user for `ХХ`; take `ННН` from the XML object area. If XML has several areas or no clear object area, ask which area to use before creating TXT.
+- Always ask whether the technical plan is prepared under the simplified or notification procedure. If simplified, add: `Технический план составлен в соответствии с ч.12 ст.70 Закона о регистрации, согласно которому, собственник объекта недвижимости выбрал "упрощенный" порядок оформления.` If notification, add: `Технический план подготовлен в соответствии с нормами градостроительного кодекса на основании уведомлений о планируемом строительстве и о завершении строительства.`
 - End with engineer and contract details.
 
 ## Quality Check
@@ -140,6 +143,10 @@ Before giving the final text, check:
 - the final TXT contains only the cadastral engineer conclusion, not XML parsing notes, data-source comments, or "Требуется уточнить" sections;
 - the final TXT does not refer to XML as a source;
 - geodetic-basis details are not included in the conclusion;
+- survey equipment details are complete when used: name, number, verification certificate details, and validity period if available;
+- coordinate system is complete, including MCK zone and code when available;
+- for technical plans, the exact SKP formula phrase is included with SKP value from user and object area from XML;
+- for technical plans, simplified vs notification procedure is clarified and the corresponding exact phrase is included;
 - for уточняемые/исправляемые land parcels, the 15+ year boundary-existence question was resolved when relevant;
 - for related land parcels from XML, уточнение vs исправление was clarified before drafting related-parcel wording;
 - no official fact was invented or inferred without confirmation;
@@ -187,3 +194,26 @@ Before writing the file, scan the final text and remove or prevent these pattern
 - user questions or missing-data checklists.
 
 The final text may use facts parsed from XML, but it must present them as facts of the cadastral work, not as "XML data".
+
+## Required Coordinate-System Validation
+
+Before writing the final TXT, scan the text for every occurrence of `МСК-` or `местной системе координат`.
+
+Every coordinate-system phrase must include:
+
+- MCK name;
+- zone;
+- code when available.
+
+Valid examples:
+
+- `МСК-16, зона 1 (код 16.1)`;
+- `МСК-16, зона 2 (код 16.2)`.
+
+Invalid examples:
+
+- `в местной системе координат МСК-16`;
+- `координаты определены в МСК-16`;
+- `система координат МСК-16`.
+
+If the generated text contains `МСК-16` or any other `МСК-*` without `зона` in the same sentence, rewrite the text before saving. If the XML does not provide `CsCode` or the zone cannot be determined, ask the user before creating the TXT.

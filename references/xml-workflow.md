@@ -42,18 +42,37 @@ Look for:
 - area: `Area/Area`, `Area/Unit`, `Area/Inaccuracy`, `Area/Formula`;
 - previous/register area: `AreaInGKN`;
 - area difference: `DeltaArea`;
-- coordinate system: `EntitySpatial/@Name`, `EntitySpatial/@CsCode`;
+- coordinate system: `EntitySpatial/@Name`, `EntitySpatial/@CsCode`, MCK zone;
 - spatial elements and points: `SpatialElement`, `SpelementUnit`, `OldOrdinate`, `NewOrdinate`;
 - point details: `NumGeopoint`, `X`, `Y`, `DeltaGeopoint`, `GeopointZacrep`, `GeopointOpred`, `Formula`;
 - boundaries and edge lengths: `Borders`, `Border`, `Edge/Length`;
 - related parcels: `SpecifyRelatedParcel/@CadastralNumber`, `ChangeBorder`;
 - formed parcels: designations such as `:ЗУ1`, `:ЗУ2`, areas, contours;
 - geodetic basis: `InputData/GeodesicBases/GeodesicBase`;
-- survey equipment: `InputData/MeansSurvey/MeanSurvey`;
+- survey equipment: `InputData/MeansSurvey/MeanSurvey`, including `Name`, `Number`, `CertificateVerification`, verification date and validity period when available;
 - appendices and attached documents: `Appendix/AppliedFiles`;
 - current conclusion: `Conclusion`.
 
+For technical plans, the object area from XML must be reused in the required SKP phrase:
+
+`СКП вычисляется по формуле Mp = Ms*√(a²+b²) и составила [СКП from user] на площадь объекта [area from XML] кв.м.`
+
+Ask the user for the SKP value. Do not invent it. If XML has several areas or no clear object area, ask which area to use.
+
+Ask whether the technical plan is prepared under the simplified or notification procedure:
+
+- if simplified, include exactly: `Технический план составлен в соответствии с ч.12 ст.70 Закона о регистрации, согласно которому, собственник объекта недвижимости выбрал "упрощенный" порядок оформления.`
+- if notification, include exactly: `Технический план подготовлен в соответствии с нормами градостроительного кодекса на основании уведомлений о планируемом строительстве и о завершении строительства.`
+
+Do not create the final TXT for a technical plan until both the SKP value and the procedure type are clarified.
+
 Do not include geodetic-basis details in the final conclusion. They may be parsed for understanding, but the conclusion should not list geodetic control points.
+
+Do include survey equipment details in full when the conclusion mentions coordinate determination. The wording should preserve all available instrument fields: name, serial/factory number, verification certificate details, and validity period. If only part of the instrument information is available, ask the worker for the missing details before final TXT generation when the equipment paragraph is required.
+
+Write the coordinate system fully. If XML contains `EntitySpatial/@Name="МСК-16"` and `CsCode="16.1"`, the conclusion should say `МСК-16, зона 1 (код 16.1)`. If `CsCode="16.2"`, say `МСК-16, зона 2 (код 16.2)`. In general, the part after the dot in `CsCode` is the zone number. If the zone cannot be determined, ask the worker before creating the final TXT.
+
+Before saving the TXT, run a text-level check: every sentence containing `МСК-` must also contain `зона` or be rewritten. A phrase like `в местной системе координат МСК-16` is invalid even if the zone was known during parsing.
 
 From XML `InputData` / source-document sections, use only PZZ information in the final conclusion when it exists and is relevant. Do not automatically list all source documents or appendices in the conclusion.
 
@@ -152,11 +171,12 @@ Before creating the final document, confirm these blocks are complete:
 
 1. Work identification: plan type and work type.
 2. Object identification: object type, cadastral number, address/location.
-3. Technical basis: area, coordinate system, contours/points, instruments or characteristic source documents.
+3. Technical basis: area, coordinate system with MCK zone/code, contours/points, instruments or characteristic source documents.
 4. Legal basis: contract, supporting documents, appendices, court/authority/project/publication details when used.
 5. Result justification: access, adjacent parcels, agreement/publication, PZZ/VRI/zone, registry error or demolition reason if relevant.
 6. Contractor details: cadastral engineer, organization, contacts, registry number, agreement.
 7. Output details: final file name and format.
+8. For technical plans: SKP value from user, object area from XML, and simplified/notification procedure.
 
 If any required block is incomplete, do not create the final TXT. Ask the questions first. A "Требуется уточнить" section is allowed only in the chat before final generation, never inside the final TXT file.
 
@@ -171,9 +191,9 @@ If any required block is incomplete, do not create the final TXT. Ask the questi
 - площадь по результатам работ: [площадь] кв.м;
 - площадь по ЕГРН: [площадь] кв.м;
 - изменение площади: [разница] кв.м;
-- МСК: [местная система координат];
+- МСК: [местная система координат, зона, код];
 - связанные земельные участки: [кадастровые номера];
-- прибор: [наименование прибора, если это нужно для анализа];
+- прибор: [полное наименование, номер, реквизиты и срок действия поверки, если это нужно для заключения];
 - заключение в XML отсутствует или пустое.
 ```
 
@@ -193,6 +213,7 @@ Ask for these only when not present in XML or other supplied documents:
 10. Cadastral engineer details, organization, contract, preparation date.
 11. Whether public lookup in NSPD/Rosкадастр/FGIS TP is allowed.
 12. Final TXT output file name.
+13. For technical plans: SKP value for `Mp = Ms*√(a²+b²)` and whether the procedure is simplified or notification-based.
 
 ## Missing-Data Questionnaire Template
 
