@@ -1,28 +1,63 @@
-# cadastral-conclusions skill
+# Skill для подготовки заключений кадастрового инженера
 
-Skill for preparing Russian cadastral engineer conclusions (`Заключение кадастрового инженера`, ЗКИ) from cadastral XML files and verified source data.
+Этот репозиторий содержит skill для ИИ, который помогает готовить русскоязычные заключения кадастрового инженера на основе XML-файлов межевых планов, технических планов, актов обследования и проверенных исходных данных.
 
-The skill is intended for:
+Skill предназначен для официальной кадастровой документации, поэтому главное требование - достоверность. ИИ не должен придумывать сведения, закрывать пробелы догадками или включать в итоговый документ непроверенную информацию.
 
-- boundary plans (`MP`, `GKUZU`): уточнение, образование, раздел, перераспределение, выдел, объединение, исправление реестровой ошибки;
-- technical plans (`TP`, `GKUOKS`): buildings, houses, garages, premises, flats, constructions, creation, reconstruction, characteristic changes, coordinate уточнение;
-- inspection acts (`InspectionAct`, `act_*`): demolition / termination of existence of buildings or structures.
+## Для чего нужен skill
 
-## What the skill enforces
+Skill помогает:
 
-- XML is used for preliminary parsing and questions, not cited as a source in the final conclusion.
-- Missing information is requested from the worker before the final file is created.
-- The final result is always a plain `.txt` file.
-- The final `.txt` contains only the cadastral engineer conclusion.
-- No guesses, assumptions, or unverified data are allowed in official text.
-- Public data can be used only from official/publicly accessible reliable sources and only when the user allows lookup.
+- разобрать XML межевого плана (`MP`, `GKUZU`);
+- разобрать XML технического плана (`TP`, `GKUOKS`);
+- разобрать XML акта обследования (`InspectionAct`, `act_*`);
+- определить тип кадастровых работ;
+- понять, какие сведения уже есть в XML;
+- составить вопросы по недостающим данным;
+- после ответов работника подготовить итоговый TXT-файл с заключением кадастрового инженера.
 
-## Repository layout
+## Какие задачи поддерживаются
+
+Для земельных участков:
+
+- уточнение границ и площади;
+- образование земельного участка;
+- раздел;
+- перераспределение;
+- выдел в счет доли;
+- объединение;
+- исправление реестровой ошибки;
+- анализ связанных и смежных земельных участков.
+
+Для объектов капитального строительства:
+
+- создание здания, гаража, дома, помещения, сооружения;
+- реконструкция;
+- изменение характеристик;
+- уточнение по координатам;
+- исправление реестровой ошибки;
+- подготовка акта обследования при сносе или прекращении существования объекта.
+
+## Что строго контролирует skill
+
+- XML используется только для предварительного анализа и вопросов.
+- В итоговом заключении нельзя писать `Из XML получено`, `по сведениям XML`, `указано в XML`, `в XML отражено`.
+- Все вопросы задаются до создания итогового файла.
+- Итоговый файл создается только в формате `.txt`.
+- Итоговый TXT содержит только текст заключения кадастрового инженера.
+- В итоговый TXT нельзя добавлять служебные разделы, вопросы, рабочую карточку, список недостающих сведений.
+- Геодезическая основа не указывается в заключении.
+- Из исходных данных XML в итоговый документ берутся только сведения о ПЗЗ, если они нужны.
+- По связанным земельным участкам ИИ обязан уточнить: участок уточняется или исправляется.
+- Для уточняемых или исправляемых ЗУ ИИ должен спросить, чем подтверждается существование границ 15 и более лет.
+
+## Структура репозитория
 
 ```text
 .
 ├── SKILL.md
 ├── README.md
+├── INSTALL_FOR_OTHER_AI.md
 ├── LICENSE
 ├── .gitignore
 └── references/
@@ -33,50 +68,77 @@ The skill is intended for:
     └── xml-workflow.md
 ```
 
-## Installation
+Назначение файлов:
 
-### Codex / Agents local skills
+- `SKILL.md` - главная инструкция для ИИ.
+- `references/document-structure.md` - структура заключений и правила полноты.
+- `references/public-data-lookup.md` - как искать сведения в НСПД, Роскадастре, ФГИС ТП и официальных источниках.
+- `references/questions.md` - список вопросов для работника.
+- `references/templates.md` - шаблоны формулировок.
+- `references/xml-workflow.md` - правила разбора XML.
+- `INSTALL_FOR_OTHER_AI.md` - инструкция для обычного человека, как подключить skill в ChatGPT, Claude и другие ИИ.
 
-Copy this repository folder into one of your local skills directories.
+## Как установить в Codex
 
-Common locations on Windows:
+Скопируйте папку репозитория в одну из папок skills.
 
-```text
-C:\Users\<UserName>\.agents\skills\cadastral-conclusions
-```
-
-or:
-
-```text
-C:\Users\<UserName>\.codex\skills\cadastral-conclusions
-```
-
-The installed folder must contain `SKILL.md` at its root:
+Обычно на Windows это:
 
 ```text
-C:\Users\<UserName>\.agents\skills\cadastral-conclusions\SKILL.md
+C:\Users\<ИмяПользователя>\.agents\skills\cadastral-conclusions
 ```
 
-Restart Codex or open a new chat after installation.
+или:
 
-## Using With ChatGPT, Claude, And Other AI
+```text
+C:\Users\<ИмяПользователя>\.codex\skills\cadastral-conclusions
+```
 
-For non-Codex tools, use [INSTALL_FOR_OTHER_AI.md](INSTALL_FOR_OTHER_AI.md). It explains how to connect this skill through ChatGPT Projects, Custom GPTs, Claude Projects, ordinary chats, and other AI systems that support instructions and knowledge files.
+Важно: файл `SKILL.md` должен лежать в корне папки skill:
 
-### From GitHub
+```text
+C:\Users\<ИмяПользователя>\.agents\skills\cadastral-conclusions\SKILL.md
+```
 
-Clone the repository:
+После копирования откройте новый чат или перезапустите Codex.
+
+## Как скачать с GitHub
+
+Вариант 1. Скачать ZIP:
+
+1. Откройте страницу репозитория на GitHub.
+2. Нажмите `Code`.
+3. Нажмите `Download ZIP`.
+4. Распакуйте архив.
+5. Скопируйте папку skill в папку skills вашего ИИ.
+
+Вариант 2. Через Git:
 
 ```powershell
 git clone https://github.com/<owner>/<repo>.git cadastral-conclusions
 ```
 
-Then copy the cloned `cadastral-conclusions` folder to your skills directory.
+Затем скопируйте папку `cadastral-conclusions` в каталог skills.
 
-## Example prompts
+## Как подключить в ChatGPT, Claude и другие ИИ
+
+Подробная инструкция находится здесь:
+
+[INSTALL_FOR_OTHER_AI.md](INSTALL_FOR_OTHER_AI.md)
+
+В ней описано:
+
+- как подключить через ChatGPT Project;
+- как подключить через Custom GPT;
+- как использовать в обычном чате ChatGPT;
+- как подключить через Claude Project;
+- как использовать в обычном чате Claude;
+- как подключить в других ИИ через инструкции и файлы знаний.
+
+## Примеры запросов
 
 ```text
-Используй cadastral-conclusions. Разбери XML межевого плана, задай вопросы по недостающим данным и после ответов создай TXT-заключение.
+Используй cadastral-conclusions. Разбери XML межевого плана, задай вопросы по недостающим данным и после моих ответов создай TXT-заключение.
 ```
 
 ```text
@@ -87,35 +149,47 @@ Then copy the cloned `cadastral-conclusions` folder to your skills directory.
 Разбери XML акта обследования и составь список вопросов перед созданием заключения.
 ```
 
-## Official-document accuracy
+## Типовой порядок работы
 
-This skill is designed for official cadastral documentation. The model must not invent:
+1. Пользователь прикладывает XML.
+2. ИИ разбирает XML.
+3. ИИ определяет, какие сведения есть.
+4. ИИ задает вопросы по недостающим данным.
+5. Пользователь отвечает.
+6. ИИ создает итоговый TXT-файл.
+7. В TXT находится только заключение кадастрового инженера.
 
-- cadastral numbers;
-- addresses;
-- areas;
-- permitted uses / ВРИ;
-- territorial zones;
-- right holders;
-- contract details;
-- engineer credentials;
-- publication details;
-- registry-error reasons;
-- legal conclusions.
+## Важное правило достоверности
 
-If a fact is missing or doubtful, the model must ask the user or rely on an official source explicitly allowed by the user.
+ИИ не имеет права придумывать:
 
-## Final TXT rules
+- кадастровые номера;
+- адреса;
+- площади;
+- ВРИ;
+- территориальные зоны;
+- правообладателей;
+- реквизиты договоров;
+- сведения о кадастровом инженере;
+- реквизиты публикаций;
+- причины реестровой ошибки;
+- правовые выводы.
 
-The final `.txt` must not contain:
+Если данных не хватает или есть сомнение, ИИ должен задать вопрос пользователю или использовать официальный источник, если пользователь разрешил поиск.
 
-- questions to the worker;
-- parsing notes;
-- phrases like `Из XML получено`, `по сведениям XML`, `указано в XML`, `в XML отражено`;
-- a `Требуется уточнить` section;
-- geodetic-basis point descriptions;
-- raw lists of XML source documents, except PZZ information when legally relevant.
+## Что нельзя включать в итоговый TXT
 
-## License
+Итоговый `.txt` не должен содержать:
 
-MIT. See [LICENSE](LICENSE).
+- вопросы к работнику;
+- служебные заметки;
+- рабочую карточку разбора XML;
+- фразы `Из XML получено`, `по сведениям XML`, `указано в XML`, `в XML отражено`;
+- раздел `Требуется уточнить`;
+- сведения о геодезической основе;
+- полный список исходных XML-документов, если они не нужны для юридического обоснования;
+- непроверенную информацию.
+
+## Лицензия
+
+MIT. См. файл [LICENSE](LICENSE).
